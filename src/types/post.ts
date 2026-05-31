@@ -1,4 +1,4 @@
-import type { AIProviderId, AIModelInfo } from "./providers";
+import type { AIProviderId } from "./providers";
 
 export type Platform =
   | "x"
@@ -43,6 +43,7 @@ export interface PostDraft {
   externalPlatform?: "x";
   externalPostId?: string;
   externalUrl?: string;
+  postedAt?: string;
   hashtags: string[];
   hook?: string;
   cta?: string;

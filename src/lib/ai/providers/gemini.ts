@@ -1,3 +1,4 @@
+import type { AIModelInfo } from "@/types/providers";
 import type { AIProviderRuntime } from "../types";
 import { nowMs, withLatency } from "../runtime";
 
@@ -17,7 +18,7 @@ type GeminiModelItem = {
 };
 
 let geminiDisabledUntil = 0;
-let geminiModelsCache: { expiresAt: number; models: typeof models } | null = null;
+let geminiModelsCache: { expiresAt: number; models: AIModelInfo[] } | null = null;
 
 export class GeminiProviderError extends Error {
   status: number;

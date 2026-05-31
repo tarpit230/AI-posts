@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPost, listPosts } from "@/lib/db/queries";
 import { postDraftSchema, postQuerySchema } from "@/lib/validation/schemas";
-import { generatePostDraft } from "@/lib/ai";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

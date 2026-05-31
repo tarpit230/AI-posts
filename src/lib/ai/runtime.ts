@@ -5,12 +5,12 @@ export function nowMs() {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
 
-export function withLatency<T>(start: number, result: T) {
+export function withLatency<T extends object>(start: number, result: T): T & { latencyMs: number } {
   const end = nowMs();
   return {
     ...(result as object),
     latencyMs: Math.round(end - start)
-  };
+  } as T & { latencyMs: number };
 }
 
 export function fallbackText(action: string, prompt: string) {

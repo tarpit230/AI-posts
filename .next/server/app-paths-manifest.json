@@ -1,6 +1,8 @@
 {
+  "/api/generate/post/route": "app/api/generate/post/route.js",
   "/api/posts/route": "app/api/posts/route.js",
-  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
+  "/api/posts/[id]/publish/route": "app/api/posts/[id]/publish/route.js",
   "/(app)/posts/[id]/page": "app/(app)/posts/[id]/page.js",
+  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
   "/(app)/posts/page": "app/(app)/posts/page.js"
 }

@@ -1,7 +1,13 @@
 node_modules
-.env.example
+.next
+.vercel
+.turbo
+*.tsbuildinfo
 .env.local
 
 PLAN.md
 GPt5.2-plan.md
 GPT5.4-mini-plan.md
+
+.env.example
+.env.local

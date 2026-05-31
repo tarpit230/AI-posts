@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { GenerateForm } from "@/components/generate/GenerateForm";
 import { getConfiguredProviderCatalog } from "@/lib/ai/registry";
 import { chooseGeminiModel } from "@/lib/ai/gemini-models";
-import type { PostFormat } from "@/types/post";
+import type { Platform, PostFormat } from "@/types/post";
 import { listPosts, getProviderSettings } from "@/lib/db/queries";
 
 export default async function DashboardPage() {
@@ -16,13 +16,14 @@ export default async function DashboardPage() {
   });
 
   const configuredProvider = providers.find((provider) => provider.id === settings?.defaults?.provider) ?? providers[0];
+  const defaultPlatform = (settings?.defaults?.platform as Platform | undefined) ?? "x";
   const configuredModel =
     configuredProvider?.id === "gemini"
-      ? chooseGeminiModel((settings?.defaults?.platform as any) ?? "x", configuredProvider?.models ?? [], settings?.defaults?.model)
+      ? chooseGeminiModel(defaultPlatform, configuredProvider?.models ?? [], settings?.defaults?.model)
       : configuredProvider?.models.find((model) => model.id === settings?.defaults?.model)?.id ??
         configuredProvider?.models[0]?.id ??
         "";
-  const defaultFormat: PostFormat = (settings?.defaults?.platform as any) === "instagram" ? "image" : "text";
+  const defaultFormat: PostFormat = defaultPlatform === "instagram" ? "image" : "text";
 
   return (
     <div className="space-y-6">
@@ -56,7 +57,7 @@ export default async function DashboardPage() {
         <GenerateForm
           providers={providers}
           initial={{
-            platform: (settings?.defaults?.platform as any) ?? "x",
+            platform: defaultPlatform,
             provider: configuredProvider?.id ?? "openai",
             model: configuredModel,
             topic: "",

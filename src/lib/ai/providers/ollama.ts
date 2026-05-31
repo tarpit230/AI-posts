@@ -1,4 +1,5 @@
 import type { AIProviderRuntime } from "../types";
+import type { AITextResult } from "../types";
 import { fallbackText, nowMs, withLatency } from "../runtime";
 
 const models = [
@@ -14,9 +15,9 @@ export const ollamaProvider: AIProviderRuntime = {
   models,
   isConfigured: () => Boolean(process.env.OLLAMA_BASE_URL),
   listModels: () => models,
-  generateText: async ({ prompt, model, system }) => {
+  generateText: async ({ prompt, model, system }): Promise<AITextResult> => {
     const baseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
-    if (!baseUrl) return { provider: "ollama", model, text: fallbackText("post", prompt) };
+    if (!baseUrl) return { provider: "ollama" as const, model, text: fallbackText("post", prompt) };
     const started = nowMs();
     try {
       const response = await fetch(`${baseUrl.replace(/\/$/, "")}/api/chat`, {

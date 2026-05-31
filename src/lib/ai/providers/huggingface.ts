@@ -1,4 +1,5 @@
 import type { AIProviderRuntime } from "../types";
+import type { AITextResult } from "../types";
 import { fallbackText, nowMs, withLatency, toText } from "../runtime";
 
 const models = [
@@ -13,9 +14,9 @@ export const huggingfaceProvider: AIProviderRuntime = {
   models,
   isConfigured: () => Boolean(process.env.HUGGINGFACE_API_KEY),
   listModels: () => models,
-  generateText: async ({ prompt, model, system }) => {
+  generateText: async ({ prompt, model, system }): Promise<AITextResult> => {
     const apiKey = process.env.HUGGINGFACE_API_KEY;
-    if (!apiKey) return { provider: "huggingface", model, text: fallbackText("post", prompt) };
+    if (!apiKey) return { provider: "huggingface" as const, model, text: fallbackText("post", prompt) };
     const started = nowMs();
     try {
       const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {

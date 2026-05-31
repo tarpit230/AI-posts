@@ -112,7 +112,7 @@ export async function generateHook(input: GenerationInput, content: string) {
   return result.text.trim().split("\n")[0] ?? content.slice(0, 80);
 }
 
-export async function generateCta(input: GenerationInput, content: string) {
+export async function generateCta(input: GenerationInput) {
   const result = await generateWithProvider(input, "cta");
   return result.text.trim().split("\n")[0] ?? "What do you think?";
 }

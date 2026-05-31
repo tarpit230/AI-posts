@@ -13,6 +13,6 @@ export async function POST(request: Request) {
   if (!content) {
     return NextResponse.json({ error: "Content is required." }, { status: 400 });
   }
-  const cta = await generateCta(parsed.data, content);
+  const cta = await generateCta(parsed.data);
   return NextResponse.json({ cta });
 }

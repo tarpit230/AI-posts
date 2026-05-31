@@ -1,4 +1,5 @@
 import type { AIProviderRuntime } from "../types";
+import type { AITextResult } from "../types";
 import { fallbackText, nowMs, withLatency } from "../runtime";
 
 const models = [
@@ -10,7 +11,7 @@ const models = [
 async function generateText(prompt: string, model: string, system?: string) {
   const apiKey = process.env.OPENAI_API_KEY;
   const baseUrl = process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1";
-  if (!apiKey) return fallbackText("post", prompt);
+  if (!apiKey) return { provider: "openai" as const, model, text: fallbackText("post", prompt) };
   const started = nowMs();
   try {
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -60,5 +61,5 @@ export const openaiProvider: AIProviderRuntime = {
   models,
   isConfigured: () => Boolean(process.env.OPENAI_API_KEY),
   listModels: () => models,
-  generateText: async (request) => generateText(request.prompt, request.model, request.system)
+  generateText: async (request): Promise<AITextResult> => generateText(request.prompt, request.model, request.system)
 };

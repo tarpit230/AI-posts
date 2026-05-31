@@ -15,6 +15,7 @@ import { PlatformBadge } from "./PlatformBadge";
 import { chooseGeminiModel } from "@/lib/ai/gemini-models";
 import type { PostDraft, PostFormat } from "@/types/post";
 import type { ProviderInfo } from "@/types/providers";
+import Image from "next/image";
 
 const toneOptions = ["", "Friendly", "Bold", "Professional", "Playful", "Educational", "Persuasive"];
 const goalOptions = ["", "Engagement", "Leads", "Sales", "Awareness", "Traffic", "Community"];
@@ -362,7 +363,13 @@ export function PostEditor({ post, providers }: { post: PostDraft; providers: Pr
               </div>
               {imageAsset ? (
                 <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
-                  <img src={imageAsset} alt={imageAlt || `${topic} Instagram image post`} className="h-auto w-full" />
+                  <Image
+                    src={imageAsset}
+                    alt={imageAlt || `${topic} Instagram image post`}
+                    width={1080}
+                    height={1080}
+                    className="h-auto w-full"
+                  />
                   <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 p-3 text-sm text-slate-400">
                     <span>{imageAlt || `${topic} Instagram image post`}</span>
                     <a

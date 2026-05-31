@@ -11,6 +11,7 @@ import { Card } from "../ui/card";
 import { PromptPreview } from "./PromptPreview";
 import { ProviderModelPicker } from "./ProviderModelPicker";
 import { chooseGeminiModel } from "@/lib/ai/gemini-models";
+import Image from "next/image";
 import type { Platform, PostFormat } from "@/types/post";
 import type { ProviderInfo } from "@/types/providers";
 
@@ -268,10 +269,12 @@ export function GenerateForm({ providers, initial }: Props) {
             <p className="text-sm font-medium text-slate-100">Generated image</p>
             <p className="text-sm text-slate-400">{generatedImageAlt || "Preview of the generated Instagram image."}</p>
           </div>
-          <img
+          <Image
             src={generatedImageAsset}
             alt={generatedImageAlt || "Generated Instagram image"}
-            className="w-full rounded-2xl border border-slate-800"
+            width={1080}
+            height={1080}
+            className="h-auto w-full rounded-2xl border border-slate-800"
           />
         </Card>
       ) : null}

@@ -6,11 +6,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/(app)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -20,6 +15,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(app)/loading.js"
+    ],
+    "/(app)/posts/[id]/not-found": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(app)/posts/[id]/not-found.js"
+    ],
+    "/(app)/posts/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(app)/posts/[id]/page.js"
     ],
     "/(app)/dashboard/page": [
       "static/chunks/webpack.js",
@@ -36,35 +41,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/posts/route.js"
     ],
-    "/(app)/posts/[id]/not-found": [
+    "/api/posts/[id]/publish/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(app)/posts/[id]/not-found.js"
-    ],
-    "/(app)/posts/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(app)/posts/[id]/page.js"
-    ],
-    "/api/models/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/models/route.js"
+      "static/chunks/app/api/posts/[id]/publish/route.js"
     ],
     "/(app)/posts/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(app)/posts/page.js"
-    ],
-    "/api/posts/[id]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/posts/[id]/route.js"
-    ],
-    "/api/posts/[id]/publish/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/posts/[id]/publish/route.js"
     ]
   }
 }

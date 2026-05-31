@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { PostsTable } from "@/components/posts/PostsTable";
 import { getConfiguredProviderCatalog } from "@/lib/ai/registry";
 import { listPosts, getProviderSettings } from "@/lib/db/queries";
+import type { Platform, PostStatus } from "@/types/post";
 
 export default async function PostsPage({
   searchParams
@@ -12,11 +13,13 @@ export default async function PostsPage({
   const settings = await getProviderSettings();
   const page = Number(params.page ?? "1");
   const pageSize = settings?.ui?.pageSize ?? 10;
+  const initialPlatform = (params.platform as Platform | undefined) ?? undefined;
+  const initialStatus = (params.status as PostStatus | undefined) ?? undefined;
   const result = await listPosts({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize,
-    platform: params.platform,
-    status: params.status as any,
+    platform: initialPlatform,
+    status: initialStatus,
     q: params.q
   });
   const providers = await getConfiguredProviderCatalog();
@@ -38,8 +41,8 @@ export default async function PostsPage({
           initialTotal={result.total}
           pageSize={pageSize}
           initialPage={Number.isFinite(page) && page > 0 ? page : 1}
-          initialPlatform={params.platform as any}
-          initialStatus={params.status as any}
+          initialPlatform={initialPlatform}
+          initialStatus={initialStatus}
         />
       )}
     </div>

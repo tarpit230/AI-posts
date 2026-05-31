@@ -1,4 +1,5 @@
 import type { AIProviderRuntime } from "../types";
+import type { AITextResult } from "../types";
 import { fallbackText, nowMs, withLatency } from "../runtime";
 
 const models = [
@@ -14,10 +15,10 @@ export const openrouterProvider: AIProviderRuntime = {
   models,
   isConfigured: () => Boolean(process.env.OPENROUTER_API_KEY),
   listModels: () => models,
-  generateText: async ({ prompt, model, system }) => {
+  generateText: async ({ prompt, model, system }): Promise<AITextResult> => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     const baseUrl = process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
-    if (!apiKey) return { provider: "openrouter", model, text: fallbackText("post", prompt) };
+    if (!apiKey) return { provider: "openrouter" as const, model, text: fallbackText("post", prompt) };
     const started = nowMs();
     try {
       const response = await fetch(`${baseUrl}/chat/completions`, {

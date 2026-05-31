@@ -6,7 +6,7 @@ const links = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/posts", label: "Posts" },
   { href: "/settings", label: "Settings" }
-];
+] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (

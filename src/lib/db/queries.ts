@@ -2,49 +2,124 @@ import { Types } from "mongoose";
 import { PostDraftModel } from "./models/PostDraft";
 import { UserSettingsModel } from "./models/UserSettings";
 import { connectMongo, isMongoConfigured } from "./mongoose";
-import type { PostDraft, PostFormValues, PostStatus, PostScore } from "@/types/post";
+import type { Platform, PostDraft, PostStatus, PostScore } from "@/types/post";
 import type { AIProviderId } from "@/types/providers";
 import { scoreContent } from "../scoring/heuristics";
 
-function toPostDraft(doc: any): PostDraft {
+type LeanVariationDoc = {
+  content?: string | null;
+  provider?: AIProviderId | null;
+  model?: string | null;
+  createdAt?: string | Date | null;
+};
+
+type LeanPostDraftDoc = {
+  _id: { toString: () => string };
+  platform: Platform;
+  status: PostStatus;
+  topic: string;
+  niche?: string | null;
+  tone?: string | null;
+  goal?: string | null;
+  postFormat?: string | null;
+  provider: AIProviderId;
+  model: string;
+  content: string;
+  imagePrompt?: string | null;
+  imageAsset?: string | null;
+  imageAlt?: string | null;
+  externalPlatform?: string | null;
+  externalPostId?: string | null;
+  externalUrl?: string | null;
+  postedAt?: string | Date | null;
+  hashtags?: string[] | null;
+  hook?: string | null;
+  cta?: string | null;
+  variations?: LeanVariationDoc[] | null;
+  scores?: {
+    engagement: number;
+    monetization: number;
+    explanation?: string | null;
+    computedAt: string;
+  } | null;
+  meta?: {
+    promptVersion?: string;
+    inputTokens?: number;
+    outputTokens?: number;
+    latencyMs?: number;
+  } | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+};
+
+function toStringOrUndefined(value: unknown) {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function toPostFormat(value: unknown) {
+  return value === "image" ? "image" : "text";
+}
+
+function toIsoString(value: Date | string | undefined) {
+  if (value instanceof Date) return value.toISOString();
+  return value ?? new Date().toISOString();
+}
+
+function toPostDraft(doc: LeanPostDraftDoc): PostDraft {
   return {
     _id: doc._id.toString(),
     platform: doc.platform,
     status: doc.status,
     topic: doc.topic,
-    niche: doc.niche,
-    tone: doc.tone,
-    goal: doc.goal,
-    postFormat: doc.postFormat ?? "text",
+    niche: toStringOrUndefined(doc.niche),
+    tone: toStringOrUndefined(doc.tone),
+    goal: toStringOrUndefined(doc.goal),
+    postFormat: toPostFormat(doc.postFormat),
     provider: doc.provider,
     model: doc.model,
     content: doc.content,
-    imagePrompt: doc.imagePrompt,
-    imageAsset: doc.imageAsset,
-    imageAlt: doc.imageAlt,
-    externalPlatform: doc.externalPlatform,
-    externalPostId: doc.externalPostId,
-    externalUrl: doc.externalUrl,
+    imagePrompt: toStringOrUndefined(doc.imagePrompt),
+    imageAsset: toStringOrUndefined(doc.imageAsset),
+    imageAlt: toStringOrUndefined(doc.imageAlt),
+    externalPlatform: doc.externalPlatform === "x" ? "x" : undefined,
+    externalPostId: toStringOrUndefined(doc.externalPostId),
+    externalUrl: toStringOrUndefined(doc.externalUrl),
+    postedAt:
+      typeof doc.postedAt === "string"
+        ? doc.postedAt
+        : doc.postedAt instanceof Date
+          ? doc.postedAt.toISOString()
+          : undefined,
     hashtags: doc.hashtags ?? [],
-    hook: doc.hook,
-    cta: doc.cta,
-    variations: (doc.variations ?? []).map((variation: any) => ({
-      content: variation.content,
-      provider: variation.provider,
-      model: variation.model,
-      createdAt: variation.createdAt
+    hook: toStringOrUndefined(doc.hook),
+    cta: toStringOrUndefined(doc.cta),
+    variations: (doc.variations ?? []).map((variation) => ({
+      content: variation.content ?? "",
+      provider: variation.provider ?? "openai",
+      model: variation.model ?? "",
+      createdAt:
+        typeof variation.createdAt === "string"
+          ? variation.createdAt
+          : variation.createdAt instanceof Date
+            ? variation.createdAt.toISOString()
+            : new Date().toISOString()
     })),
     scores: doc.scores
       ? {
           engagement: doc.scores.engagement,
           monetization: doc.scores.monetization,
-          explanation: doc.scores.explanation,
+          explanation: toStringOrUndefined(doc.scores.explanation),
           computedAt: doc.scores.computedAt
         }
       : undefined,
-    meta: doc.meta ?? { promptVersion: "v1" },
-    createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
-    updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt
+    meta: {
+      promptVersion: doc.meta?.promptVersion ?? "v1",
+      inputTokens: doc.meta?.inputTokens,
+      outputTokens: doc.meta?.outputTokens,
+      latencyMs: doc.meta?.latencyMs
+    },
+    createdAt: toIsoString(doc.createdAt),
+    updatedAt: toIsoString(doc.updatedAt)
   };
 }
 
@@ -57,8 +132,8 @@ export async function getProviderSettings() {
 
 export async function upsertProviderSettings(input: {
   defaults?: {
-    platform?: string;
-    provider?: string;
+    platform?: Platform;
+    provider?: AIProviderId;
     model?: string;
     tone?: string;
     goal?: string;
@@ -75,7 +150,9 @@ export async function upsertProviderSettings(input: {
       ...existing.defaults,
       ...input.defaults
     };
-    existing.ui = { ...existing.ui, ...input.ui };
+    existing.ui = {
+      pageSize: input.ui?.pageSize ?? existing.ui?.pageSize ?? 10
+    };
     await existing.save();
     return existing.toObject();
   }
@@ -105,14 +182,14 @@ export async function listPosts(params: {
     PostDraftModel.find(filter).sort({ createdAt: -1 }).skip((params.page - 1) * params.pageSize).limit(params.pageSize).lean(),
     PostDraftModel.countDocuments(filter)
   ]);
-  return { items: items.map(toPostDraft), total };
+  return { items: items.map((item) => toPostDraft(item as LeanPostDraftDoc)), total };
 }
 
 export async function getPost(id: string) {
   if (!Types.ObjectId.isValid(id) || !isMongoConfigured()) return null;
   await connectMongo();
   const doc = await PostDraftModel.findById(id).lean();
-  return doc ? toPostDraft(doc) : null;
+  return doc ? toPostDraft(doc as LeanPostDraftDoc) : null;
 }
 
 export async function createPost(input: {
@@ -136,7 +213,7 @@ export async function createPost(input: {
 }) {
   await connectMongo();
   const score = input.scores ?? scoreContent({
-    platform: input.platform as any,
+    platform: input.platform as Platform,
     content: input.content,
     niche: input.niche,
     goal: input.goal
@@ -151,7 +228,7 @@ export async function createPost(input: {
       ...input.meta
     }
   });
-  return toPostDraft(created.toObject());
+  return toPostDraft(created.toObject() as LeanPostDraftDoc);
 }
 
 export async function updatePost(id: string, updates: Partial<PostDraft>) {
@@ -162,14 +239,14 @@ export async function updatePost(id: string, updates: Partial<PostDraft>) {
   Object.assign(doc, updates);
   if (updates.content || updates.goal || updates.niche || updates.platform) {
     doc.scores = scoreContent({
-      platform: doc.platform as any,
+      platform: doc.platform as Platform,
       content: doc.content,
-      niche: doc.niche,
-      goal: doc.goal
+      niche: toStringOrUndefined(doc.niche),
+      goal: toStringOrUndefined(doc.goal)
     });
   }
   await doc.save();
-  return toPostDraft(doc.toObject());
+  return toPostDraft(doc.toObject() as LeanPostDraftDoc);
 }
 
 export async function deletePost(id: string) {
@@ -187,5 +264,5 @@ export async function markPostPosted(id: string, postedAt = new Date().toISOStri
     { status: "posted", postedAt },
     { new: true }
   ).lean();
-  return updated ? toPostDraft(updated) : null;
+  return updated ? toPostDraft(updated as LeanPostDraftDoc) : null;
 }

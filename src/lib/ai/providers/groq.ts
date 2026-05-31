@@ -1,4 +1,5 @@
 import type { AIProviderRuntime } from "../types";
+import type { AITextResult } from "../types";
 import { fallbackText, nowMs, withLatency } from "../runtime";
 import type { AIModelInfo } from "@/types/providers";
 
@@ -85,10 +86,10 @@ export const groqProvider: AIProviderRuntime = {
   models,
   isConfigured: () => Boolean(getGroqApiKey()),
   listModels: () => models,
-  generateText: async ({ prompt, model, system }) => {
+  generateText: async ({ prompt, model, system }): Promise<AITextResult> => {
     const apiKey = getGroqApiKey();
     const baseUrl = getGroqBaseUrl();
-    if (!apiKey) return { provider: "groq", model, text: fallbackText("post", prompt) };
+    if (!apiKey) return { provider: "groq" as const, model, text: fallbackText("post", prompt) };
     const started = nowMs();
     try {
       const response = await fetch(`${baseUrl}/chat/completions`, {
